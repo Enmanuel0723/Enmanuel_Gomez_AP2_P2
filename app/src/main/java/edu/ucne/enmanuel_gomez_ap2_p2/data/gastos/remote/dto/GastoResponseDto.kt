@@ -5,6 +5,6 @@ data class GastoResponseDto(
     val fecha: String,
     val suplidor: String,
     val ncf: String,
-    val itbis: Int,
-    val monto: Int,
+    val itbis: Double,
+    val monto: Double,
 )

@@ -7,6 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import edu.ucne.enmanuel_gomez_ap2_p2.data.gastos.remote.GastoApiService
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
@@ -25,11 +27,30 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideGastoApi(): GastoApiService {
+    fun providesOkHttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(MoshiConverterFactory.create(provideMoshi()))
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-            .create(GastoApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGastoApiService(retrofit: Retrofit): GastoApiService {
+        return retrofit.create(GastoApiService::class.java)
     }
 }
